@@ -1,27 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { getFleetResponseSchema } from './schemas.js';
+import { payoutAddressResponseSchema } from './schemas.js';
 
-describe('fleet response schemas', () => {
-  const fleet = {
-    id: '00000000-0000-4000-8000-000000000000',
-    chainFleetId: '1',
-    ownerAddress: 'G'.repeat(128),
-    treasuryAddress: 'G'.repeat(56),
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
-    drivers: [],
-    totalActiveDrivers: 0,
-  };
+describe('payoutAddressResponseSchema', () => {
+  it('accepts payout addresses up to the maximum address length', () => {
+    const result = payoutAddressResponseSchema.safeParse({
+      data: { payoutAddress: 'A'.repeat(128) },
+    });
 
-  it('accepts owner addresses up to the maximum length', () => {
-    expect(getFleetResponseSchema.safeParse({ data: fleet }).success).toBe(true);
+    expect(result.success).toBe(true);
   });
 
-  it('rejects owner addresses longer than the maximum length', () => {
-    expect(
-      getFleetResponseSchema.safeParse({
-        data: { ...fleet, ownerAddress: 'G'.repeat(129) },
-      }).success,
-    ).toBe(false);
+  it('rejects payout addresses longer than the maximum address length', () => {
+    const result = payoutAddressResponseSchema.safeParse({
+      data: { payoutAddress: 'A'.repeat(129) },
+    });
+
+    expect(result.success).toBe(false);
   });
 });

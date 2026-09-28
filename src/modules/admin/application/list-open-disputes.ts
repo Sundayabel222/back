@@ -4,46 +4,14 @@ export interface ListOpenDisputesDeps {
   disputeReviewReader: DisputeReviewReader;
 }
 
-export interface ListOpenDisputesInput {
-  limit?: number;
-  /** Cursor returned by the previous page. */
-  after?: string;
-}
-
-export interface ListOpenDisputesResult {
-  items: DisputeReviewItem[];
-  nextCursor: string | null;
-  limit: number;
-}
-
-const DEFAULT_LIMIT = 50;
-const MAX_LIMIT = 200;
-const MAX_CHAIN_DELIVERY_ID = 9_223_372_036_854_775_807n;
-
-function decodeCursor(cursor: string): { raisedAt: Date; chainDeliveryId: bigint } {
-  const separatorIndex = cursor.indexOf('|');
-  if (separatorIndex <= 0 || separatorIndex !== cursor.lastIndexOf('|')) {
-    throw new Error('Invalid dispute cursor');
-  }
-
-  const raisedAtText = cursor.slice(0, separatorIndex);
-  const raisedAt = new Date(raisedAtText);
-  const chainDeliveryIdText = cursor.slice(separatorIndex + 1);
-  if (
-    !Number.isFinite(raisedAt.getTime()) ||
-    raisedAt.toISOString() !== raisedAtText ||
-    !/^(0|[1-9]\d{0,18})$/.test(chainDeliveryIdText)
-  ) {
-    throw new Error('Invalid dispute cursor');
-  }
-
-  const chainDeliveryId = BigInt(chainDeliveryIdText);
-  if (chainDeliveryId > MAX_CHAIN_DELIVERY_ID) {
-    throw new Error('Invalid dispute cursor');
-  }
-  return { raisedAt, chainDeliveryId };
-}
-
+/**
+ * Creates the use case for listing disputes that are awaiting administrative
+ * review.
+ *
+ * @param deps - Use case dependencies; requires a `disputeReviewReader` used
+ *   to retrieve the currently open disputes.
+ * @returns An async function that resolves to the open dispute review items.
+ */
 export function createListOpenDisputesUseCase(deps: ListOpenDisputesDeps) {
   return async function listOpenDisputes(
     input: ListOpenDisputesInput = {},
