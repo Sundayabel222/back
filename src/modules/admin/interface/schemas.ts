@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const MAX_ENTITY_TYPE_LENGTH = 100;
+
 const disputeStatus = z.enum(['OPEN', 'RESOLVED_REFUND', 'RESOLVED_PAYOUT', 'SPLIT']);
 const userRole = z.enum(['CUSTOMER', 'COURIER', 'FLEET_MANAGER', 'ADMIN']);
 
@@ -33,7 +35,7 @@ export const listAuditLogResponseSchema = z.object({
       actorId: z.string().uuid().nullable(),
       actorLabel: z.string(),
       action: z.string(),
-      entityType: z.string(),
+      entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH),
       entityId: z.string(),
       metadata: z.record(z.unknown()).nullable(),
       createdAt: z.string().datetime(),

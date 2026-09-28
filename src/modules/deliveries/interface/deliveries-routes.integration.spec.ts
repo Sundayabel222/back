@@ -130,6 +130,16 @@ describe.skipIf(!dbAvailable)('deliveries routes (integration)', () => {
     expect(response.statusCode).toBe(401);
   });
 
+  it('rejects an unauthenticated confirm-delivery request before body validation', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/transactions/build/confirm-delivery',
+      payload: {},
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
+
   // Regression coverage for the raise-dispute/raise-delivery-dispute route
   // collision (this endpoint previously had no HTTP-level coverage at all —
   // only a unit-level use-case-delegation test) — see
